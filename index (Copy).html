@@ -17,10 +17,12 @@
             flex-direction: column;
             flex-wrap: nowrap;
             align-items: center;
+
             overflow-x: hidden;
             gap: 10px;
             padding: 20px;
         }
+
 
         iframe {
             width: 500px;
@@ -35,7 +37,7 @@
     <div id="videoContainer"></div>
     <textarea id="videoUrl" placeholder="Enter YouTube link(s) separated by commas or newlines"></textarea>
     <button onclick="addVideos()">Add Videos</button>
-
+   
     <script>
         const apiUrl = "https://youtube-links-viewer-backend.vercel.app/links";
 
@@ -45,17 +47,13 @@
             const links = await response.json();
             const videoContainer = document.getElementById("videoContainer");
             videoContainer.innerHTML = "";
-
             links.forEach(link => {
                 const videoId = extractVideoId(link.url);
                 if (videoId) {
                     const iframe = document.createElement("iframe");
-                    iframe.dataset.src = `https://www.youtube.com/embed/${videoId}`; // Set the src as data-src initially
-                    iframe.allowFullscreen = true; // Allow fullscreen
+                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                    iframe.allowFullscreen = true; // Add this line to enable fullscreen
                     videoContainer.appendChild(iframe);
-
-                    // Lazy load the iframe when it comes into view
-                    observeIframe(iframe);
                 }
             });
         }
@@ -90,20 +88,6 @@
         function parseUrls(input) {
             const urls = input.split(/\n|,|\s+/).map(url => url.trim()).filter(url => extractVideoId(url));
             return urls;
-        }
-
-        // Function to observe when an iframe enters the viewport and load it
-        function observeIframe(iframe) {
-            const observer = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        iframe.src = iframe.dataset.src; // Set the src from data-src when in view
-                        observer.unobserve(iframe); // Stop observing after loading the iframe
-                    }
-                });
-            }, { threshold: 0.5 }); // Load when 50% of the iframe is visible
-
-            observer.observe(iframe);
         }
 
         // Initial fetch to load existing videos
