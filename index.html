@@ -42,11 +42,14 @@
 
 <body>
     <h1>Anonymus LLM</h1>
-    <!-- <input type="text" id="videoUrl" placeholder="Enter YouTube link"> -->
-    <!-- <button onclick="addVideo()">Add Video</button> -->
     <div id="videoContainer"></div>
+    <textarea id="videoUrl" placeholder="Enter YouTube link(s) separated by commas or newlines"></textarea>
+    <button onclick="addVideos()">Add Videos</button>
+   
     <script>
-        const apiUrl = "http://localhost:3000/links";
+        const apiUrl = "https://youtube-links-viewer-backend.vercel.app/links";
+
+        // Function to fetch and display videos
         async function fetchVideos() {
             const response = await fetch(apiUrl);
             const links = await response.json();
@@ -61,28 +64,43 @@
                 }
             });
         }
-        async function addVideo() {
+
+        // Function to add multiple videos
+        async function addVideos() {
             const urlInput = document.getElementById("videoUrl").value;
-            const videoId = extractVideoId(urlInput);
-            if (!videoId) {
-                alert("Invalid YouTube URL");
+            const urls = parseUrls(urlInput);
+            if (urls.length === 0) {
+                alert("No valid YouTube URLs found.");
                 return;
             }
+
             await fetch(apiUrl, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: urlInput })
+                body: JSON.stringify({ urls })
             });
-            document.getElementById("videoUrl").value = "";
-            fetchVideos();
+
+            document.getElementById("videoUrl").value = ""; // Clear the input field
+            fetchVideos(); // Reload the videos
         }
+
+        // Function to extract video IDs from a list of URLs
         function extractVideoId(url) {
             const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
             const match = url.match(regex);
             return match ? match[1] : null;
         }
+
+        // Function to parse the input into an array of valid URLs
+        function parseUrls(input) {
+            const urls = input.split(/\n|,|\s+/).map(url => url.trim()).filter(url => extractVideoId(url));
+            return urls;
+        }
+
+        // Initial fetch to load existing videos
         fetchVideos();
     </script>
+
 </body>
 
 </html>
