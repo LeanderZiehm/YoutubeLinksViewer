@@ -19,7 +19,6 @@
             align-items: center;
 
             overflow-x: hidden;
-            /* Remove horizontal scrolling */
             gap: 10px;
             padding: 20px;
         }
@@ -30,13 +29,6 @@
             height: 270px;
             border: none;
         }
-
-        /* iframe {
-            width: 50%;
-            height: auto;
-            border: none;
-            display: block;
-        } */
     </style>
 </head>
 
@@ -60,6 +52,7 @@
                 if (videoId) {
                     const iframe = document.createElement("iframe");
                     iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                    iframe.allowFullscreen = true; // Add this line to enable fullscreen
                     videoContainer.appendChild(iframe);
                 }
             });
