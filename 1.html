@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Video Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #videoContainer {
+            display: flex;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            gap: 10px;
+            padding: 20px;
+        }
+        iframe {
+            width: 300px;
+            height: 200px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube Video Display</h1>
+    <input type="text" id="videoUrl" placeholder="Enter YouTube link">
+    <button onclick="addVideo()">Add Video</button>
+    <div id="videoContainer"></div>
+    <script>
+        const apiUrl = "http://localhost:3000/links";
+        async function fetchVideos() {
+            const response = await fetch(apiUrl);
+            const links = await response.json();
+            const videoContainer = document.getElementById("videoContainer");
+            videoContainer.innerHTML = "";
+            links.forEach(link => {
+                const videoId = extractVideoId(link.url);
+                if (videoId) {
+                    const iframe = document.createElement("iframe");
+                    iframe.src = `https://www.youtube.com/embed/${videoId}`;
+                    videoContainer.appendChild(iframe);
+                }
+            });
+        }
+        async function addVideo() {
+            const urlInput = document.getElementById("videoUrl").value;
+            const videoId = extractVideoId(urlInput);
+            if (!videoId) {
+                alert("Invalid YouTube URL");
+                return;
+            }
+            await fetch(apiUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ url: urlInput })
+            });
+            document.getElementById("videoUrl").value = "";
+            fetchVideos();
+        }
+        function extractVideoId(url) {
+            const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]{11})/;
+            const match = url.match(regex);
+            return match ? match[1] : null;
+        }
+        fetchVideos();
+    </script>
+</body>
+</html>
